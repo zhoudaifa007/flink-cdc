@@ -1,0 +1,23 @@
+CREATE TABLE es_user (
+   userId BIGINT,
+   userName STRING,
+   logo STRING,
+   PRIMARY KEY (userId) NOT ENFORCED
+ ) WITH (
+    'connector.type' = 'elasticsearch',
+    'connector.version' = '7',
+    'connector.hosts' = 'http://localhost:9200',
+    'connector.index' = 'user_behavior',
+    'connector.document-type' = 'user',
+    'connector.bulk-flush.interval' = '6000',
+    'connector.connection-max-retry-timeout' = '3',
+    'connector.bulk-flush.back-off.max-retries' = '3',
+    'connector.bulk-flush.back-off.delay' = '10000',
+    'update-mode' = 'upsert',
+    'format.type' = 'json'
+);
+
+
+https://ververica.github.io/flink-cdc-connectors/master/content/quickstart/mysql-postgres-tutorial.html#enriching-orders-and-load-to-elasticsearch
+
+

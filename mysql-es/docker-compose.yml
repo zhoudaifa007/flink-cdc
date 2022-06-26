@@ -1,0 +1,64 @@
+version: "2.2"
+services:
+  sql-client:
+    image: ftisiot/flink_sql_cli:1.15.0
+    depends_on:
+      - jobmanager
+      - elasticsearch
+    environment:
+      FLINK_JOBMANAGER_HOST: jobmanager
+    volumes:
+      - ./settings/:/settings
+
+  jobmanager:
+    image: flink:1.15.0-scala_2.12-java11
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+    volumes:
+      - ./settings/:/settings
+      - ./data/:/data
+
+  taskmanager:
+    image: flink:1.15.0-scala_2.12-java11
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 10
+    volumes:
+      - ./settings/:/settings
+      - ./data/:/data
+  elasticsearch:
+    image: elastic/elasticsearch:7.2.0
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+    volumes:
+      - D:/es-data:/usr/share/elasticsearch/data  
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+  kibana:
+    image: elastic/kibana:7.2.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
